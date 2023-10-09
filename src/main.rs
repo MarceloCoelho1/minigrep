@@ -1,6 +1,7 @@
 use std::env;
 use std::process;
 
+use mingrep;
 use mingrep::Config;
 
 
@@ -14,7 +15,7 @@ fn main() {
         process::exit(1);
     });
 
-    Config::run(config).expect("You cannot read this file");
+    mingrep::run(config).expect("You cannot read this file");
 
 }
 
