@@ -15,7 +15,11 @@ fn main() {
         process::exit(1);
     });
 
-    mingrep::run(config).expect("You cannot read this file");
+    if let Err(e) = mingrep::run(config) {
+        eprintln!("Application error: {e}");
+        process::exit(1);
+    }
+
 
 }
 
