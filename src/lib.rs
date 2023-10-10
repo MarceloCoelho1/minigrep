@@ -9,6 +9,12 @@ pub struct Config{
     pub ignore_case: bool,
 }
 
+pub struct Line {
+    line: String,
+    line_number: u32,
+}
+
+
 impl Config {
     pub fn build(args: &[String]) -> Result<Config, &'static str>{
         if args.len() < 3 {
@@ -38,32 +44,43 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
         search(&config.query, &contents)
     };
 
-    for line in results {
-        println!("{line}");
+    for Line {line, line_number} in &results {
+        println!("{}: {}", line_number, line);
     }
+
 
     Ok(())
 }
 
-pub fn search_case_insensitive<'a> (query: &str, contents: &'a str) -> Vec<&'a str> {
+pub fn search_case_insensitive<'a> (query: &str, contents: &'a str) -> Vec<Line> {
     let query = query.to_lowercase();
-    let mut results = Vec::new();
+    let mut results = Vec::<Line>::new();
+
+    let mut line_number: u32 = 0;
+    let mut _string_line: u32 = 0;
 
     for line in contents.lines() {
+        line_number += 1;
         if line.to_lowercase().contains(&query) {
-           results.push(line);
+            _string_line = line_number;
+            results.push(Line{line: String::from(line), line_number: _string_line});
         }
     }
 
     results
 }
 
-pub fn search<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
+pub fn search<'a>(query: &str, contents: &'a str) -> Vec<Line> {
     let mut results = Vec::new();
     
+    let mut line_number: u32 = 0;
+    let mut _string_line: u32 = 0;
+
     for line in contents.lines() {
+        line_number += 1;
         if line.contains(query) {
-            results.push(line);
+            _string_line = line_number;
+            results.push(Line{line: String::from(line), line_number: _string_line});
         }
     }
 
