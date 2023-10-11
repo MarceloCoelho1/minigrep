@@ -6,7 +6,7 @@ mingrep is a simple clone of the `grep` command-line tool, written in Rust. It a
 
 To use mingrep, you can run it from the command line with the following syntax:
 
-## mingrep <query> <file_path> [--ignore-case]
+## mingrep [--ignore-case] <query> <file_path> 
 
 - `--ignore-case` (optional): Perform a case-insensitive search.
 - `<query>`: The string you want to search for in the file.
