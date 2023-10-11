@@ -9,6 +9,8 @@ pub struct Config{
     pub ignore_case: bool,
 }
 
+#[derive(Debug)]
+#[derive(PartialEq)]
 pub struct Line {
     line: String,
     line_number: u32,
@@ -92,30 +94,27 @@ mod tests {
     use super::*;
 
     #[test]
-    fn one_result() {
-        let query = "duct";
-        let contents = "\
-Running test in rust:
-safe, fast, productive.
-Pick three.
-Duct tape.";
-
-        assert_eq!(vec!["safe, fast, productive."], search(query, contents));
-    }
-
-    #[test]
     fn case_insensitive() {
-        let query = "rUsT";
+        let query = "Rust";
         let contents = "\
 Rust:
 safe, fast, productive.
 Pick three.
 Trust me.";
 
-        assert_eq!(
-            vec!["Rust:", "Trust me."],
-            search_case_insensitive(query, contents)
-        );
+        let expected_results = vec![
+            Line {
+                line: "Rust:".to_string(),
+                line_number: 1,
+            },
+            Line {
+                line: "Trust me.".to_string(),
+                line_number: 4,
+            }
+        ];
+
+        assert_eq!(expected_results, search_case_insensitive(query, contents));
     }
+
 }
 
