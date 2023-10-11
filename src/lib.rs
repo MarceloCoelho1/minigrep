@@ -43,7 +43,7 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
     let results = if config.ignore_case {
         search_case_insensitive(&config.query, &contents)
     } else {
-        search(&config.query, &contents)
+        search_case_sensitive(&config.query, &contents)
     };
 
     for Line {line, line_number} in &results {
@@ -72,7 +72,7 @@ pub fn search_case_insensitive<'a> (query: &str, contents: &'a str) -> Vec<Line>
     results
 }
 
-pub fn search<'a>(query: &str, contents: &'a str) -> Vec<Line> {
+pub fn search_case_sensitive<'a>(query: &str, contents: &'a str) -> Vec<Line> {
     let mut results = Vec::new();
     
     let mut line_number: u32 = 0;
@@ -114,6 +114,26 @@ Trust me.";
         ];
 
         assert_eq!(expected_results, search_case_insensitive(query, contents));
+    }
+
+
+    #[test]
+    fn case_sensitive() {
+        let query = "Rust";
+        let contents = "\
+Rust:
+safe, fast, productive.
+Pick three.
+Trust me.";
+
+        let expected_results = vec![
+            Line {
+                line: "Rust:".to_string(),
+                line_number: 1,
+            }
+        ];
+
+        assert_eq!(expected_results, search_case_sensitive(query, contents));
     }
 
 }
