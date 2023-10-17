@@ -37,13 +37,12 @@ impl Config {
 }
 
 pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
-    let contents = fs::read_to_string(config.file_path)?;
 
 
     let results = if config.ignore_case {
-        search_case_insensitive(&config.query, &contents)
+        search_case_insensitive(&config)
     } else {
-        search_case_sensitive(&config.query, &contents)
+        search_case_sensitive(&config)
     };
 
     for Line {line, line_number} in &results {
@@ -54,8 +53,13 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-pub fn search_case_insensitive<'a> (query: &str, contents: &'a str) -> Vec<Line> {
-    let query = query.to_lowercase();
+pub fn search_in_all_files<'a> (config: &Config) -> Vec<Line> {
+    
+}
+
+pub fn search_case_insensitive<'a> (config: &Config) -> Vec<Line> {
+    let contents = fs::read_to_string(&config.file_path).expect("Error");
+    let query = config.query.to_lowercase();
     let mut results = Vec::<Line>::new();
 
     let mut line_number: u32 = 0;
@@ -72,15 +76,17 @@ pub fn search_case_insensitive<'a> (query: &str, contents: &'a str) -> Vec<Line>
     results
 }
 
-pub fn search_case_sensitive<'a>(query: &str, contents: &'a str) -> Vec<Line> {
+pub fn search_case_sensitive<'a>(config: &Config) -> Vec<Line> {
+    let contents = fs::read_to_string(&config.file_path).expect("Error");
     let mut results = Vec::new();
-    
+    let query = &config.query;
+
     let mut line_number: u32 = 0;
     let mut _string_line: u32 = 0;
 
     for line in contents.lines() {
         line_number += 1;
-        if line.contains(query) {
+        if line.contains(&*query) {
             _string_line = line_number;
             results.push(Line{line: String::from(line), line_number: _string_line});
         }
