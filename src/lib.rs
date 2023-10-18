@@ -59,21 +59,26 @@ pub fn search_in_all_files<'a> (config: &Config){
     let mut _string_line: u32 = 0;
 
     for entry in entries {
+
         let entry = entry.expect("Error");
         let path = entry.path();
-        let contents = fs::read_to_string(&path).expect("Error");
         let file_name = entry.file_name();
         let file_name_str = file_name.to_string_lossy();
 
-        for line in contents.lines() {
-            line_number += 1;
+        if file_name_str.ends_with("n.rs") {
+            let contents = fs::read_to_string(&path).expect("Error");
 
-            if line.to_lowercase().contains(&config.query) {
-                _string_line = line_number;
-                results.push(Line{line: String::from(line), line_number: _string_line, file_name: Some(file_name_str.to_string())});
+            for line in contents.lines() {
+                line_number += 1;
+    
+                if line.to_lowercase().contains(&config.query) {
+                    _string_line = line_number;
+                    results.push(Line{line: String::from(line), line_number: _string_line, file_name: Some(file_name_str.to_string())});
+                }
             }
-        }
-        line_number = 0;
+            line_number = 0;
+        };
+        
 
 
         // // Imprime o nome de cada arquivo no diretório
@@ -83,7 +88,7 @@ pub fn search_in_all_files<'a> (config: &Config){
    
 
     for Line {line, line_number, file_name} in &results {
-        println!("{:?} -> {}: {}", file_name, line_number, line);
+        println!("{:?} Line: {} {}", file_name, line_number, line);
     }
 
     
