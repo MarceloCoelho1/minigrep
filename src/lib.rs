@@ -53,6 +53,8 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
 pub fn search_in_all_files<'a> (config: &Config){
     let entries = fs::read_dir(&config.file_path).expect("Error");
 
+
+
     for entry in entries {
         let entry = entry.expect("Error");
         let file_name = entry.file_name();
@@ -67,14 +69,14 @@ pub fn search_in_all_files<'a> (config: &Config){
 }
 
 pub fn search_case_insensitive<'a> (config: &Config) {
-    let contents = fs::read_to_string(&config.file_path).expect("Error");
+    let file = fs::read_to_string(&config.file_path).expect("Error");
     let query = config.query.to_lowercase();
     let mut results = Vec::<Line>::new();
 
     let mut line_number: u32 = 0;
     let mut _string_line: u32 = 0;
 
-    for line in contents.lines() {
+    for line in file.lines() {
         line_number += 1;
         if line.to_lowercase().contains(&query) {
             _string_line = line_number;
@@ -88,14 +90,14 @@ pub fn search_case_insensitive<'a> (config: &Config) {
 }
 
 pub fn search_case_sensitive<'a>(config: &Config) {
-    let contents = fs::read_to_string(&config.file_path).expect("Error");
+    let file = fs::read_to_string(&config.file_path).expect("Error");
     let mut results = Vec::new();
     let query = &config.query;
 
     let mut line_number: u32 = 0;
     let mut _string_line: u32 = 0;
 
-    for line in contents.lines() {
+    for line in file.lines() {
         line_number += 1;
         if line.contains(&*query) {
             _string_line = line_number;
