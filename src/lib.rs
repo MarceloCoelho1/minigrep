@@ -15,6 +15,7 @@ pub struct Config{
 pub struct Line {
     line: String,
     line_number: u32,
+    file_name: Option<String>,
 }
 
 
@@ -41,7 +42,7 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
 
 
     if config.ignore_case {
-        search_case_insensitive(&config)
+        search_in_all_files(&config)
     } else {
         search_case_sensitive(&config)
     }
@@ -53,15 +54,36 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
 pub fn search_in_all_files<'a> (config: &Config){
     let entries = fs::read_dir(&config.file_path).expect("Error");
 
-
+    let mut results = Vec::<Line>::new();
+    let mut line_number: u32 = 0;
+    let mut _string_line: u32 = 0;
 
     for entry in entries {
         let entry = entry.expect("Error");
+        let path = entry.path();
+        let contents = fs::read_to_string(&path).expect("Error");
         let file_name = entry.file_name();
         let file_name_str = file_name.to_string_lossy();
 
-        // Imprime o nome de cada arquivo no diretório
-        println!("{}", file_name_str);
+        for line in contents.lines() {
+            line_number += 1;
+
+            if line.to_lowercase().contains(&config.query) {
+                _string_line = line_number;
+                results.push(Line{line: String::from(line), line_number: _string_line, file_name: Some(file_name_str.to_string())});
+            }
+        }
+        line_number = 0;
+
+
+        // // Imprime o nome de cada arquivo no diretório
+        // println!("{}", file_name_str);
+    }
+
+   
+
+    for Line {line, line_number, file_name} in &results {
+        println!("{:?} -> {}: {}", file_name, line_number, line);
     }
 
     
@@ -69,43 +91,43 @@ pub fn search_in_all_files<'a> (config: &Config){
 }
 
 pub fn search_case_insensitive<'a> (config: &Config) {
-    let file = fs::read_to_string(&config.file_path).expect("Error");
+    let contents = fs::read_to_string(&config.file_path).expect("Error");
     let query = config.query.to_lowercase();
     let mut results = Vec::<Line>::new();
 
     let mut line_number: u32 = 0;
     let mut _string_line: u32 = 0;
 
-    for line in file.lines() {
+    for line in contents.lines() {
         line_number += 1;
         if line.to_lowercase().contains(&query) {
             _string_line = line_number;
-            results.push(Line{line: String::from(line), line_number: _string_line});
+            results.push(Line{line: String::from(line), line_number: _string_line, file_name: None});
         }
     }
 
-    for Line {line, line_number} in &results {
+    for Line {line, line_number, file_name: _} in &results {
         println!("{}: {}", line_number, line);
     }
 }
 
 pub fn search_case_sensitive<'a>(config: &Config) {
-    let file = fs::read_to_string(&config.file_path).expect("Error");
+    let contents = fs::read_to_string(&config.file_path).expect("Error");
     let mut results = Vec::new();
     let query = &config.query;
 
     let mut line_number: u32 = 0;
     let mut _string_line: u32 = 0;
 
-    for line in file.lines() {
+    for line in contents.lines() {
         line_number += 1;
         if line.contains(&*query) {
             _string_line = line_number;
-            results.push(Line{line: String::from(line), line_number: _string_line});
+            results.push(Line{line: String::from(line), line_number: _string_line, file_name: None});
         }
     }
 
-    for Line {line, line_number} in &results {
+    for Line {line, line_number, file_name: _} in &results {
         println!("{}: {}", line_number, line);
     }
 }
