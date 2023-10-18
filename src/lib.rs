@@ -3,6 +3,7 @@ use std::fs;
 use std::env;
 
 
+
 pub struct Config{
     pub query: String,
     pub file_path: String,
@@ -39,25 +40,33 @@ impl Config {
 pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
 
 
-    let results = if config.ignore_case {
+    if config.ignore_case {
         search_case_insensitive(&config)
     } else {
         search_case_sensitive(&config)
-    };
-
-    for Line {line, line_number} in &results {
-        println!("{}: {}", line_number, line);
     }
 
 
     Ok(())
 }
 
-pub fn search_in_all_files<'a> (config: &Config) -> Vec<Line> {
+pub fn search_in_all_files<'a> (config: &Config){
+    let entries = fs::read_dir(&config.file_path).expect("Error");
+
+    for entry in entries {
+        let entry = entry.expect("Error");
+        let file_name = entry.file_name();
+        let file_name_str = file_name.to_string_lossy();
+
+        // Imprime o nome de cada arquivo no diretório
+        println!("{}", file_name_str);
+    }
+
     
+
 }
 
-pub fn search_case_insensitive<'a> (config: &Config) -> Vec<Line> {
+pub fn search_case_insensitive<'a> (config: &Config) {
     let contents = fs::read_to_string(&config.file_path).expect("Error");
     let query = config.query.to_lowercase();
     let mut results = Vec::<Line>::new();
@@ -73,10 +82,12 @@ pub fn search_case_insensitive<'a> (config: &Config) -> Vec<Line> {
         }
     }
 
-    results
+    for Line {line, line_number} in &results {
+        println!("{}: {}", line_number, line);
+    }
 }
 
-pub fn search_case_sensitive<'a>(config: &Config) -> Vec<Line> {
+pub fn search_case_sensitive<'a>(config: &Config) {
     let contents = fs::read_to_string(&config.file_path).expect("Error");
     let mut results = Vec::new();
     let query = &config.query;
@@ -92,7 +103,9 @@ pub fn search_case_sensitive<'a>(config: &Config) -> Vec<Line> {
         }
     }
 
-    results
+    for Line {line, line_number} in &results {
+        println!("{}: {}", line_number, line);
+    }
 }
 
 #[cfg(test)]
