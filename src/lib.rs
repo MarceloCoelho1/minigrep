@@ -1,8 +1,8 @@
 use std::error::Error;
 use std::fs;
 use std::env;
-
-
+use std::path::Path;
+use std::borrow::Cow;
 
 pub struct Config{
     pub query: String,
@@ -40,8 +40,9 @@ impl Config {
 
 pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
 
-
-    if config.ignore_case {
+    if config.file_path.ends_with("/*.") {
+        search_in_all_files(&config)
+    } else if config.ignore_case {
         search_in_all_files(&config)
     } else {
         search_case_sensitive(&config)
@@ -52,7 +53,19 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
 }
 
 pub fn search_in_all_files<'a> (config: &Config){
-    let entries = fs::read_dir(&config.file_path).expect("Error");
+
+    let path = Path::new(&config.file_path);
+
+    let file_path = path.parent().unwrap();
+
+
+    let extension = path.extension().unwrap().to_str().unwrap();
+    let _extension: Cow<'_, str> = Cow::Borrowed(extension);
+
+
+
+
+    let entries = fs::read_dir(&file_path).expect("Error");
 
     let mut results = Vec::<Line>::new();
     let mut line_number: u32 = 0;
@@ -64,14 +77,14 @@ pub fn search_in_all_files<'a> (config: &Config){
         let path = entry.path();
         let file_name = entry.file_name();
         let file_name_str = file_name.to_string_lossy();
-
-        if file_name_str.ends_with("n.rs") {
+        
+        if file_name_str.ends_with(extension) {
             let contents = fs::read_to_string(&path).expect("Error");
-
+            
             for line in contents.lines() {
                 line_number += 1;
-    
-                if line.to_lowercase().contains(&config.query) {
+                
+                if line.to_lowercase().contains(&config.query.to_lowercase()) {
                     _string_line = line_number;
                     results.push(Line{line: String::from(line), line_number: _string_line, file_name: Some(file_name_str.to_string())});
                 }
@@ -81,8 +94,6 @@ pub fn search_in_all_files<'a> (config: &Config){
         
 
 
-        // // Imprime o nome de cada arquivo no diretório
-        // println!("{}", file_name_str);
     }
 
    
