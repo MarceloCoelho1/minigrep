@@ -27,7 +27,6 @@ impl Config {
         let query: &str = &args[1];
         let file_path: &str = &args[2];
         let ignore_case = env::var("IGNORE_CASE").is_ok();
-    
         Ok(Config{
             query: query.to_string(),
             file_path: file_path.to_string(),
@@ -40,12 +39,14 @@ impl Config {
 
 pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
 
-    if config.file_path.ends_with("/*.") {
+ 
+
+    if config.file_path.contains("/*.") {
         search_in_all_files(&config)
     } else if config.ignore_case {
-        search_in_all_files(&config)
-    } else {
         search_case_sensitive(&config)
+    } else {
+        search_case_insensitive(&config)
     }
 
 
@@ -55,7 +56,6 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
 pub fn search_in_all_files<'a> (config: &Config){
 
     let path = Path::new(&config.file_path);
-
     let file_path = path.parent().unwrap();
 
 
@@ -66,7 +66,6 @@ pub fn search_in_all_files<'a> (config: &Config){
 
 
     let entries = fs::read_dir(&file_path).expect("Error");
-
     let mut results = Vec::<Line>::new();
     let mut line_number: u32 = 0;
     let mut _string_line: u32 = 0;
